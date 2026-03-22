@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dagobah Fridge Pickles — Recipe Scaler</title>
+<style>
+  :root {
+    --swamp-dark: #1a2e1a;
+    --swamp-mid: #2d4a2d;
+    --swamp-light: #3d6b3d;
+    --swamp-glow: #5fa85f;
+    --swamp-pale: #c8e6c8;
+    --brine-yellow: #e8d44d;
+    --brine-yellow-dim: #b8a63d;
+    --jar-glass: rgba(200, 230, 200, 0.08);
+    --text: #e0e8d8;
+    --text-dim: #9aaa8a;
+    --bg: #0f1a0f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+    text-align: center;
+  }
+
+  .subtitle {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    text-align: center;
+  }
+
+  .card {
+    background: var(--swamp-dark);
+    border: 1px solid var(--swamp-mid);
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    width: 100%;
+    max-width: 540px;
+    margin-bottom: 1.5rem;
+  }
+
+  /* --- Size control --- */
+  .size-control { text-align: center; }
+
+  .size-control label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+  }
+
+  .size-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .size-row input {
+    width: 5.5rem;
+    text-align: center;
+    font-size: 1.6rem;
+    font-weight: 700;
+    padding: 0.4rem;
+    border: 2px solid var(--swamp-light);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--brine-yellow);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .size-row input:focus { border-color: var(--swamp-glow); }
+
+  .unit-toggle {
+    display: flex;
+    border: 1px solid var(--swamp-mid);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .unit-toggle button {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    padding: 0.45rem 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .unit-toggle button.active {
+    background: var(--swamp-light);
+    color: #fff;
+  }
+
+  .slider-wrap {
+    position: relative;
+    width: 100%;
+    margin-bottom: 0.3rem;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--swamp-mid);
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--swamp-glow);
+    border: 2px solid var(--swamp-pale);
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(95, 168, 95, 0.4);
+  }
+  input[type="range"]::-moz-range-thumb {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--swamp-glow);
+    border: 2px solid var(--swamp-pale);
+    cursor: pointer;
+  }
+
+  .preset-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+  }
+  .preset-row button {
+    font-size: 0.78rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    border: 1px solid var(--swamp-mid);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .preset-row button:hover, .preset-row button.active {
+    background: var(--swamp-mid);
+    color: var(--text);
+    border-color: var(--swamp-light);
+  }
+
+  .scale-badge {
+    display: inline-block;
+    margin-top: 0.6rem;
+    font-size: 0.8rem;
+    color: var(--brine-yellow-dim);
+    background: rgba(232, 212, 77, 0.08);
+    padding: 0.2rem 0.65rem;
+    border-radius: 6px;
+  }
+
+  /* --- Ingredient list --- */
+  .section-title {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--swamp-glow);
+    margin-bottom: 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--swamp-mid);
+  }
+
+  .ingredient {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid rgba(61, 107, 61, 0.2);
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .ingredient:last-child { border-bottom: none; }
+
+  .ing-name {
+    font-size: 0.95rem;
+    color: var(--text);
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .ing-note {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-left: 0.3rem;
+  }
+
+  .ing-amount {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.95rem;
+    color: var(--brine-yellow);
+    text-align: right;
+    flex: 0 1 auto;
+    word-break: break-word;
+  }
+
+  .crucial {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--swamp-glow);
+    background: rgba(95, 168, 95, 0.12);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    margin-left: 0.4rem;
+    vertical-align: middle;
+  }
+
+  .tip {
+    margin-top: 1rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+    padding: 0.75rem;
+    background: rgba(232, 212, 77, 0.05);
+    border-left: 3px solid var(--brine-yellow-dim);
+    border-radius: 0 8px 8px 0;
+  }
+
+  .footer {
+    margin-top: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    text-align: center;
+    opacity: 0.6;
+  }
+
+  @media (max-width: 500px) {
+    .card { padding: 1.25rem 1rem; }
+    h1 { font-size: 1.4rem; }
+    .size-row input { font-size: 1.3rem; width: 4.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🥒 Dagobah Fridge Pickles</h1>
+<p class="subtitle">Adjust your container size and watch the recipe scale</p>
+
+<!-- Size selector -->
+<div class="card size-control">
+  <label for="sizeInput">Container Size</label>
+  <div class="size-row">
+    <input type="number" id="sizeInput" value="1.3" min="0.1" max="20" step="0.1">
+    <div class="unit-toggle">
+      <button class="active" data-unit="liters">L</button>
+      <button data-unit="quarts">qt</button>
+      <button data-unit="gallons">gal</button>
+    </div>
+  </div>
+  <div class="slider-wrap">
+    <input type="range" id="sizeSlider" min="0.1" max="8" step="0.05" value="1.3">
+  </div>
+  <div class="preset-row">
+    <button data-liters="0.5">500 ml</button>
+    <button data-liters="0.95">1 qt</button>
+    <button data-liters="1.3" class="active">1.3 L</button>
+    <button data-liters="1.9">½ gal</button>
+    <button data-liters="3.8">1 gal</button>
+  </div>
+  <div class="scale-badge" id="scaleBadge">1.00×</div>
+</div>
+
+<!-- Ingredients -->
+<div class="card">
+  <div class="section-title">Brine Liquid & Spices</div>
+  <div id="ingredientList"></div>
+  <div class="tip">
+    <strong>Tip:</strong> Chop the ends off your cucumbers before quartering — the bloom end has an enzyme that softens pickles. Refrigerate at least 24 hours before eating.
+  </div>
+</div>
+
+<!-- Reuse notes -->
+<div class="card">
+  <div class="section-title">Brine Reuse (per top-up)</div>
+  <div id="reuseList"></div>
+  <div class="tip">
+    Reuse within a day or two of finishing a batch. After two reuses, start fresh.
+  </div>
+</div>
+
+<p class="footer">Base recipe: 1.3 L container</p>
+
+<script>
+  // ---- Base recipe at 1.3 L ----
+  const BASE_LITERS = 1.3;
+
+  const ingredients = [
+    { name: "White Vinegar",       base_ml: 100,    unit: "ml",  alt: "cup", alt_base: 2/5 },
+    { name: "Pickling / Canning Salt", base_g: 40, unit: "g",   alt: "tbsp", alt_base: 3,   note: "Kosher salt works too" },
+    { name: "Calcium Chloride",    base_tsp: 0.5,   unit: "tsp", crucial: true },
+    { name: "Black Peppercorns",   base_tsp: 2,     unit: "tsp" },
+    { name: "Mustard Seed",        base_tsp: 1/3,   unit: "tsp" },
+    { name: "Red Pepper Flakes",   base_tsp: 0.15,  unit: "tsp", note: "small pinch" },
+    { name: "Dill (herb/flakes)",  base_tsp: 0.5,   unit: "tsp", note: "or 2 tsp dill seed", altSeedBase: 2 },
+    { name: "Dried Garlic",        base_tsp: 0.125, unit: "tsp" },
+  ];
+
+  const reuseIngredients = [
+    { name: "Vinegar (top-up)",    base_tbsp: 2.5,  unit: "tbsp" },
+    { name: "Salt (top-up)",       base_tbsp: 1.5,  unit: "tbsp" },
+    { name: "Calcium Chloride",    base_tsp: 0.5,   unit: "tsp" },
+    { name: "Whole spices",        base_text: "half portions", unit: "" },
+  ];
+
+  // ---- Formatting helpers ----
+  function frac(n) {
+    if (n === 0) return "0";
+    const whole = Math.floor(n);
+    const rem = n - whole;
+    const fracs = [
+      [1/8, "⅛"], [1/4, "¼"], [1/3, "⅓"], [3/8, "⅜"],
+      [1/2, "½"], [5/8, "⅝"], [2/3, "⅔"], [3/4, "¾"], [7/8, "⅞"]
+    ];
+    let best = null, bestDist = 0.04;
+    for (const [val, sym] of fracs) {
+      const d = Math.abs(rem - val);
+      if (d < bestDist) { bestDist = d; best = sym; }
+    }
+    if (best) return whole ? `${whole} ${best}` : best;
+    return whole ? (rem < 0.04 ? `${whole}` : n.toFixed(1)) : n.toFixed(1);
+  }
+
+  function fmt(value, unit) {
+    // handle tsp -> tbsp upgrade
+    if (unit === "tsp" && value >= 3) {
+      return `${frac(value / 3)} tbsp`;
+    }
+    if (unit === "tbsp" && value >= 3) {
+      return `${frac(value / 3)} tbsp × 3`;
+    }
+    if (unit === "ml" && value >= 240) {
+      return `${frac(value / 240)} cup (${Math.round(value)} ml)`;
+    }
+    if (unit === "ml") {
+      return `${Math.round(value)} ml`;
+    }
+    if (unit === "g") {
+      return `${Math.round(value)} g`;
+    }
+    if (unit === "") return value;
+    return `${frac(value)} ${unit}`;
+  }
+
+  // ---- State ----
+  let currentUnit = "liters";  // display unit for the input
+  let currentLiters = BASE_LITERS;
+
+  const conversions = {
+    liters:  { from: l => l,          to: l => l,          max: 8,  step: 0.05 },
+    quarts:  { from: q => q * 0.9464, to: l => l / 0.9464, max: 8.5, step: 0.05 },
+    gallons: { from: g => g * 3.7854, to: l => l / 3.7854, max: 2.2, step: 0.01 },
+  };
+
+  // ---- DOM refs ----
+  const sizeInput  = document.getElementById("sizeInput");
+  const sizeSlider = document.getElementById("sizeSlider");
+  const scaleBadge = document.getElementById("scaleBadge");
+  const ingList    = document.getElementById("ingredientList");
+  const reuseList  = document.getElementById("reuseList");
+  const unitBtns   = document.querySelectorAll(".unit-toggle button");
+  const presetBtns = document.querySelectorAll(".preset-row button");
+
+  // ---- Render ----
+  function render() {
+    const scale = currentLiters / BASE_LITERS;
+    scaleBadge.textContent = `${scale.toFixed(2)}×`;
+
+    // Main ingredients
+    ingList.innerHTML = ingredients.map(ing => {
+      let val, display;
+      if (ing.base_ml !== undefined)  { val = ing.base_ml * scale;  display = fmt(val, "ml"); }
+      else if (ing.base_g !== undefined) {
+        val = ing.base_g * scale;
+        const altVal = ing.alt_base * scale;
+        display = `${frac(altVal)} ${ing.alt} (~${Math.round(val)}g)`;
+      }
+      else if (ing.base_tsp !== undefined) { val = ing.base_tsp * scale; display = fmt(val, "tsp"); }
+      else if (ing.base_tbsp !== undefined){ val = ing.base_tbsp * scale; display = fmt(val, "tbsp"); }
+
+      let extra = "";
+      if (ing.altSeedBase) {
+        const seedVal = ing.altSeedBase * scale;
+        extra = `  / ${fmt(seedVal, "tsp")} seed`;
+      }
+
+      const noteHtml = ing.note ? `<span class="ing-note">(${ing.note})</span>` : "";
+      const crucialHtml = ing.crucial ? `<span class="crucial">crucial</span>` : "";
+      return `<div class="ingredient">
+        <span class="ing-name">${ing.name}${crucialHtml}${noteHtml}</span>
+        <span class="ing-amount">${display}${extra}</span>
+      </div>`;
+    }).join("");
+
+    // Reuse ingredients
+    reuseList.innerHTML = reuseIngredients.map(ing => {
+      let display;
+      if (ing.base_tbsp !== undefined) { display = fmt(ing.base_tbsp * scale, "tbsp"); }
+      else if (ing.base_tsp !== undefined) { display = fmt(ing.base_tsp * scale, "tsp"); }
+      else { display = ing.base_text; }
+      return `<div class="ingredient">
+        <span class="ing-name">${ing.name}</span>
+        <span class="ing-amount">${display}</span>
+      </div>`;
+    }).join("");
+
+    // Highlight matching preset
+    presetBtns.forEach(b => {
+      const pl = parseFloat(b.dataset.liters);
+      b.classList.toggle("active", Math.abs(pl - currentLiters) < 0.02);
+    });
+  }
+
+  function setLiters(l) {
+    currentLiters = Math.max(0.1, l);
+    const conv = conversions[currentUnit];
+    const displayVal = conv.to(currentLiters);
+    sizeInput.value = parseFloat(displayVal.toFixed(2));
+    sizeSlider.max = conv.max;
+    sizeSlider.step = conv.step;
+    sizeSlider.value = displayVal;
+    render();
+  }
+
+  // ---- Events ----
+  sizeInput.addEventListener("input", () => {
+    const v = parseFloat(sizeInput.value);
+    if (!isNaN(v) && v > 0) {
+      currentLiters = conversions[currentUnit].from(v);
+      sizeSlider.value = v;
+      render();
+    }
+  });
+
+  sizeSlider.addEventListener("input", () => {
+    const v = parseFloat(sizeSlider.value);
+    currentLiters = conversions[currentUnit].from(v);
+    sizeInput.value = parseFloat(v.toFixed(2));
+    render();
+  });
+
+  unitBtns.forEach(btn => btn.addEventListener("click", () => {
+    unitBtns.forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    currentUnit = btn.dataset.unit;
+    setLiters(currentLiters);
+  }));
+
+  presetBtns.forEach(btn => btn.addEventListener("click", () => {
+    setLiters(parseFloat(btn.dataset.liters));
+  }));
+
+  // ---- Init ----
+  render();
+</script>
+</body>
+</html>
