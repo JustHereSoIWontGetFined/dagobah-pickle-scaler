@@ -318,7 +318,7 @@
 
   const ingredients = [
     { name: "White Vinegar",       base_ml: 100,    unit: "ml",  alt: "oz", alt_base: 100/29.5735 },
-    { name: "Pickling / Kosher Salt", base_g: 40, unit: "g",   alt: "tbsp", alt_base: 3 },
+    { name: "Salt",                 base_g: 40, unit: "g",   alt: "tbsp", alt_base: 3 },
     { name: "Calcium Chloride",    base_tsp: 0.5,   unit: "tsp", crucial: true },
     { name: "Black Peppercorns",   base_tsp: 2,     unit: "tsp" },
     { name: "Mustard Seed",        base_tsp: 1/3,   unit: "tsp" },
@@ -404,7 +404,7 @@
         val = ing.base_ml * scale;
         if (ing.alt === "oz") {
           const altVal = ing.alt_base * scale;
-          display = `${Math.round(altVal)} oz (${Math.round(val)} ml)`;
+          display = `${(Math.round(altVal * 10) / 10).toFixed(1)} oz (${Math.round(val)} ml)`;
         } else {
           display = fmt(val, "ml");
         }
