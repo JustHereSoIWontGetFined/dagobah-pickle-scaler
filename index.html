@@ -296,14 +296,6 @@
   </div>
 </div>
 
-<!-- Reuse notes -->
-<div class="card">
-  <div class="section-title">Brine Reuse (per top-up)</div>
-  <div id="reuseList"></div>
-  <div class="tip">
-    Reuse within a day or two of finishing a batch. After two reuses, start fresh.
-  </div>
-</div>
 
 <p class="footer">Base recipe: 1.3 L container</p>
 
@@ -322,12 +314,6 @@
     { name: "Dried Garlic",        base_tsp: 0.125, unit: "tsp" },
   ];
 
-  const reuseIngredients = [
-    { name: "Vinegar (top-up)",    base_tbsp: 2.5,  unit: "tbsp" },
-    { name: "Salt (top-up)",       base_tbsp: 1.5,  unit: "tbsp" },
-    { name: "Calcium Chloride",    base_tsp: 0.5,   unit: "tsp" },
-    { name: "Whole spices",        base_text: "half portions", unit: "" },
-  ];
 
   // ---- Formatting helpers ----
   function frac(n) {
@@ -383,7 +369,6 @@
   const sizeSlider = document.getElementById("sizeSlider");
   const scaleBadge = document.getElementById("scaleBadge");
   const ingList    = document.getElementById("ingredientList");
-  const reuseList  = document.getElementById("reuseList");
   const unitBtns   = document.querySelectorAll(".unit-toggle button");
   const presetBtns = document.querySelectorAll(".preset-row button");
 
@@ -415,18 +400,6 @@
       return `<div class="ingredient">
         <span class="ing-name">${ing.name}${crucialHtml}${noteHtml}</span>
         <span class="ing-amount">${display}${extra}</span>
-      </div>`;
-    }).join("");
-
-    // Reuse ingredients
-    reuseList.innerHTML = reuseIngredients.map(ing => {
-      let display;
-      if (ing.base_tbsp !== undefined) { display = fmt(ing.base_tbsp * scale, "tbsp"); }
-      else if (ing.base_tsp !== undefined) { display = fmt(ing.base_tsp * scale, "tsp"); }
-      else { display = ing.base_text; }
-      return `<div class="ingredient">
-        <span class="ing-name">${ing.name}</span>
-        <span class="ing-amount">${display}</span>
       </div>`;
     }).join("");
 
