@@ -366,7 +366,15 @@
     // Main ingredients
     ingList.innerHTML = ingredients.map(ing => {
       let val, display;
-      if (ing.base_ml !== undefined)  { val = ing.base_ml * scale;  display = fmt(val, "ml"); }
+      if (ing.base_ml !== undefined)  {
+        val = ing.base_ml * scale;
+        if (ing.alt === "cup") {
+          const altVal = ing.alt_base * scale;
+          display = `${frac(altVal)} ${ing.alt} (${Math.round(val)} ml)`;
+        } else {
+          display = fmt(val, "ml");
+        }
+      }
       else if (ing.base_g !== undefined) {
         val = ing.base_g * scale;
         const altVal = ing.alt_base * scale;
