@@ -334,27 +334,27 @@
     const whole = Math.floor(n);
     const rem = n - whole;
     const fracs = [
-      [1/4, "¼"], [1/2, "½"], [3/4, "¾"]
+      [1/8, "⅛"], [1/4, "¼"], [3/8, "⅜"], [1/2, "½"], [5/8, "⅝"], [3/4, "¾"], [7/8, "⅞"]
     ];
-    let best = null, bestDist = 0.15;
+    let best = null, bestDist = 0.07;
     for (const [val, sym] of fracs) {
       const d = Math.abs(rem - val);
       if (d < bestDist) { bestDist = d; best = sym; }
     }
     if (best) return whole ? `${whole} ${best}` : best;
-    const rounded = Math.round(n * 4) / 4;
+    const rounded = Math.round(n * 8) / 8;
     if (Number.isInteger(rounded)) return `${rounded}`;
     return rounded.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
   }
 
   function fmt(value, unit) {
-    // round tsp/tbsp to nearest quarter
+    // round tsp/tbsp to nearest eighth
     if (unit === "tsp" || unit === "tbsp") {
-      value = Math.round(value * 4) / 4;
+      value = Math.round(value * 8) / 8;
     }
     // handle tsp -> tbsp upgrade
     if (unit === "tsp" && value >= 3) {
-      const tbspVal = Math.round((value / 3) * 4) / 4;
+      const tbspVal = Math.round((value / 3) * 8) / 8;
       return `${frac(tbspVal)} tbsp`;
     }
     if (unit === "tbsp" && value >= 3) {
