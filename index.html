@@ -317,13 +317,13 @@
   const BASE_LITERS = 1.3;
 
   const ingredients = [
-    { name: "White Vinegar",       base_ml: 100,    unit: "ml",  alt: "cup", alt_base: 2/5 },
+    { name: "White Vinegar",       base_ml: 100,    unit: "ml",  alt: "oz", alt_base: 100/29.5735 },
     { name: "Pickling / Kosher Salt", base_g: 40, unit: "g",   alt: "tbsp", alt_base: 3 },
     { name: "Calcium Chloride",    base_tsp: 0.5,   unit: "tsp", crucial: true },
     { name: "Black Peppercorns",   base_tsp: 2,     unit: "tsp" },
     { name: "Mustard Seed",        base_tsp: 1/3,   unit: "tsp" },
-    { name: "Red Pepper Flakes",   base_tsp: 0.5,   unit: "tsp", note: "adjust to taste" },
-    { name: "Dill (herb/flakes)",  base_tsp: 0.5,   unit: "tsp", note: "or 2 tsp dill seed", altSeedBase: 2 },
+    { name: "Red Pepper Flakes",   base_tsp: 0.5,   unit: "tsp", note: "to taste" },
+    { name: "Dill Weed",           base_tsp: 0.5,   unit: "tsp" },
     { name: "Dried Garlic",        base_tsp: 0.125, unit: "tsp" },
   ];
 
@@ -334,22 +334,28 @@
     const whole = Math.floor(n);
     const rem = n - whole;
     const fracs = [
-      [1/8, "⅛"], [1/4, "¼"], [1/3, "⅓"], [3/8, "⅜"],
-      [1/2, "½"], [5/8, "⅝"], [2/3, "⅔"], [3/4, "¾"], [7/8, "⅞"]
+      [1/4, "¼"], [1/2, "½"], [3/4, "¾"]
     ];
-    let best = null, bestDist = 0.04;
+    let best = null, bestDist = 0.15;
     for (const [val, sym] of fracs) {
       const d = Math.abs(rem - val);
       if (d < bestDist) { bestDist = d; best = sym; }
     }
     if (best) return whole ? `${whole} ${best}` : best;
-    return whole ? (rem < 0.04 ? `${whole}` : n.toFixed(1)) : n.toFixed(1);
+    const rounded = Math.round(n * 4) / 4;
+    if (Number.isInteger(rounded)) return `${rounded}`;
+    return rounded.toFixed(2).replace(/0+$/, '').replace(/\.$/, '');
   }
 
   function fmt(value, unit) {
+    // round tsp/tbsp to nearest quarter
+    if (unit === "tsp" || unit === "tbsp") {
+      value = Math.round(value * 4) / 4;
+    }
     // handle tsp -> tbsp upgrade
     if (unit === "tsp" && value >= 3) {
-      return `${frac(value / 3)} tbsp`;
+      const tbspVal = Math.round((value / 3) * 4) / 4;
+      return `${frac(tbspVal)} tbsp`;
     }
     if (unit === "tbsp" && value >= 3) {
       return `${frac(value / 3)} tbsp × 3`;
@@ -396,9 +402,9 @@
       let val, display;
       if (ing.base_ml !== undefined)  {
         val = ing.base_ml * scale;
-        if (ing.alt === "cup") {
+        if (ing.alt === "oz") {
           const altVal = ing.alt_base * scale;
-          display = `${frac(altVal)} ${ing.alt} (${Math.round(val)} ml)`;
+          display = `${Math.round(altVal)} oz (${Math.round(val)} ml)`;
         } else {
           display = fmt(val, "ml");
         }
