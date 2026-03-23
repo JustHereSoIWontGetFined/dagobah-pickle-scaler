@@ -9,7 +9,7 @@ A single-page recipe scaler for fridge pickles. Adjust your container size and t
 - Quick presets for common container sizes (500 ml, 1 qt, 1.3 L, 1/2 gal, 1 gal)
 - Ingredient checkboxes to track what you've added
 - Automatic unit upgrades (tsp to tbsp when quantities are large enough)
-- Amounts rounded to nearest 1/4 tsp/tbsp for practicality
+- Amounts rounded to nearest 1/8 tsp/tbsp for practicality
 
 ## Ingredients (base recipe — 1.3 L)
 
